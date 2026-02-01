@@ -11,7 +11,7 @@ function getSupabase(): SupabaseClient | null {
 // DELETE a transaction
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = getSupabase()
   if (!supabase) {
@@ -21,7 +21,7 @@ export async function DELETE(
     )
   }
   try {
-    const { id } = params
+    const { id } = await params
 
     const { error } = await supabase
       .from('joker_transactions')
@@ -43,7 +43,7 @@ export async function DELETE(
 // PUT update a transaction
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = getSupabase()
   if (!supabase) {
@@ -53,7 +53,7 @@ export async function PUT(
     )
   }
   try {
-    const { id } = params
+    const { id } = await params
     const { given_by, given_to, count } = await request.json()
 
     if (!given_by || !given_to || count == null) {

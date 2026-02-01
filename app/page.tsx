@@ -23,8 +23,16 @@ export default function Home() {
       setError(null)
       const response = await fetch('/api/transactions')
       if (!response.ok) {
-        console.log("[v0] API response not OK:", response.status)
-        setError('Database not initialized. Please run the SQL setup from SETUP.md')
+        const status = response.status
+        const body = await response.json().catch(() => ({}))
+        const msg = body?.error ?? ''
+        if (status === 503 && msg.includes('Supabase environment')) {
+          setError('Missing Supabase environment variables. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel project Settings → Environment Variables, then redeploy.')
+        } else if (status === 500 || status === 503) {
+          setError('Database not set up. Run the SQL from SETUP.md in your Supabase project: Dashboard → SQL Editor → New query → paste the SQL → Run.')
+        } else {
+          setError('Database not initialized. Please run the SQL setup from SETUP.md in your Supabase dashboard.')
+        }
         setTransactions([])
         return
       }
@@ -32,7 +40,7 @@ export default function Home() {
       setTransactions(data || [])
     } catch (error) {
       console.error('[v0] Error fetching transactions:', error)
-      setError('Failed to connect to database. Check your Supabase connection.')
+      setError('Failed to connect to database. Check your Supabase connection and that the SQL setup was run.')
       setTransactions([])
     } finally {
       setLoading(false)
