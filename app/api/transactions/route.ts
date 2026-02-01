@@ -1,17 +1,22 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
+function getSupabase(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return createClient(url, key)
 }
-
-const supabase = createClient(supabaseUrl, supabaseKey)
 
 // GET all transactions with player details
 export async function GET() {
+  const supabase = getSupabase()
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Missing Supabase environment variables' },
+      { status: 503 }
+    )
+  }
   try {
     const { data, error } = await supabase
       .from('joker_transactions')
@@ -41,6 +46,13 @@ export async function GET() {
 
 // POST create a new transaction
 export async function POST(request: NextRequest) {
+  const supabase = getSupabase()
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Missing Supabase environment variables' },
+      { status: 503 }
+    )
+  }
   try {
     const { given_by, given_to, count } = await request.json()
 

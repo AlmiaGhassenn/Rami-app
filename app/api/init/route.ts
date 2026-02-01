@@ -1,20 +1,21 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
+function getSupabase(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return createClient(url, key)
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey)
-const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
-
 export async function POST() {
+  const supabase = getSupabase()
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Missing Supabase environment variables' },
+      { status: 503 }
+    )
+  }
   try {
     // Check if tables exist and initialize if needed
     const { data: playersCheck } = await supabase
@@ -33,6 +34,13 @@ export async function POST() {
 }
 
 export async function GET() {
+  const supabase = getSupabase()
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Missing Supabase environment variables' },
+      { status: 503 }
+    )
+  }
   try {
     // Simple health check
     const { data, error } = await supabase.auth.getSession()

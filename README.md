@@ -32,6 +32,19 @@ The queries will create:
 
 Open the app and start tracking! Everything is automatically saved.
 
+## ☁️ Deploy to Vercel
+
+1. Push your code to GitHub and import the project in [Vercel](https://vercel.com).
+2. **Add environment variables** in Vercel:
+   - Project → **Settings** → **Environment Variables**
+   - Add:
+     - `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon/public key
+   - Apply to **Production**, **Preview**, and **Development**.
+3. Redeploy. The app will work once these variables are set.
+
+Without these variables, the API will return a clear error instead of crashing.
+
 ## 📱 How to Use
 
 ### Adding a Transaction
